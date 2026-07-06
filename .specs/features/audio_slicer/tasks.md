@@ -89,8 +89,8 @@ T5, T6, T4 ──→ T7 ──→ T8
 - Skill: `managing-python-dependencies`
 
 **Done when**:
-- [ ] Dependencies added to `pyproject.toml` and verified installed.
-- [ ] `uv run ruff --version` and `uv run pytest --version` run successfully.
+- [x] Dependencies added to `pyproject.toml` and verified installed.
+- [x] `uv run ruff --version` and `uv run pytest --version` run successfully.
 
 **Tests**: none
 **Gate**: build
