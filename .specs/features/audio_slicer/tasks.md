@@ -194,10 +194,10 @@ T5, T6, T4 ──→ T7 ──→ T8
 - Skill: none
 
 **Done when**:
-- [ ] Function returns randomized `(start_seconds, end_seconds)` chunks that are completely disjoint.
-- [ ] Validates mutually exclusive `amount = -1` constraint for `Random`.
-- [ ] Implements 1000 retry limit, raising a descriptive error on failure.
-- [ ] Unit tests verify disjointness, random selection, and retry error trigger.
+- [x] Function returns randomized `(start_seconds, end_seconds)` chunks that are completely disjoint.
+- [x] Validates mutually exclusive `amount = -1` constraint for `Random`.
+- [x] Implements 1000 retry limit, raising a descriptive error on failure.
+- [x] Unit tests verify disjointness, random selection, and retry error trigger.
 
 **Tests**: unit
 **Gate**: quick
