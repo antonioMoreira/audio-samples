@@ -152,9 +152,9 @@ T5, T6, T4 ──→ T7 ──→ T8
 - Skill: none
 
 **Done when**:
-- [ ] PyAV audio properties loader implemented.
-- [ ] Returns correct duration as integer/float.
-- [ ] Unit tests verify metadata reading using a mock or a small test WAV file.
+- [x] PyAV audio properties loader implemented.
+- [x] Returns correct duration as integer/float.
+- [x] Unit tests verify metadata reading using a mock or a small test WAV file.
 
 **Tests**: unit
 **Gate**: quick
