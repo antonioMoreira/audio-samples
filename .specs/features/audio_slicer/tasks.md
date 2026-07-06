@@ -173,9 +173,9 @@ T5, T6, T4 ──→ T7 ──→ T8
 - Skill: none
 
 **Done when**:
-- [ ] Function returns sequential `(start_seconds, end_seconds)` chunks from beginning of file.
-- [ ] Skipped segments perfectly respect `remove_seconds`.
-- [ ] Unit tests verify sequential output, correct skipping of blocked intervals, and handling of `amount = -1`.
+- [x] Function returns sequential `(start_seconds, end_seconds)` chunks from beginning of file.
+- [x] Skipped segments perfectly respect `remove_seconds`.
+- [x] Unit tests verify sequential output, correct skipping of blocked intervals, and handling of `amount = -1`.
 
 **Tests**: unit
 **Gate**: quick
