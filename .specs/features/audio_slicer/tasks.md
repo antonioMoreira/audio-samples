@@ -237,11 +237,11 @@ T5, T6, T4 ──→ T7 ──→ T8
 - Skill: none
 
 **Done when**:
-- [ ] Typer CLI parses arguments: `audio_name`, `chunks_dirname`, `chunks_rules_yaml`, `sampling_rule`.
-- [ ] CLI correctly runs validations, layouts, slices, and writes files in target subdirectories.
-- [ ] Existing output subdirectories are safely cleared before running.
-- [ ] Writes `config.yaml` detailing actual generated chunks.
-- [ ] Integration tests verify complete E2E run on sample audios, yielding correct layout and config files.
+- [x] Typer CLI parses arguments: `audio_name`, `chunks_dirname`, `chunks_rules_yaml`, `sampling_rule`.
+- [x] CLI correctly runs validations, layouts, slices, and writes files in target subdirectories.
+- [x] Existing output subdirectories are safely cleared before running.
+- [x] Writes `config.yaml` detailing actual generated chunks.
+- [x] Integration tests verify complete E2E run on sample audios, yielding correct layout and config files.
 
 **Tests**: integration
 **Gate**: full

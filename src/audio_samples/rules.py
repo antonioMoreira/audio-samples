@@ -43,6 +43,23 @@ class ChunksRule(BaseModel):
 class RulesConfig(BaseModel):
     version: int = Field(..., description="Configuration file version")
     chunks: List[ChunksRule] = Field(..., description="List of slicing rules")
+    remove_seconds: Optional[List[Tuple[int, int]]] = Field(None, description="Global time ranges to remove from sampling.")
+
+    @field_validator("remove_seconds")
+    @classmethod
+    def validate_remove_seconds(cls, v: Optional[List[Tuple[int, int]]]) -> Optional[List[Tuple[int, int]]]:
+        if v is None:
+            return v
+        for item in v:
+            if len(item) != 2:
+                raise ValueError("Each interval in remove_seconds must have exactly 2 elements (start, end)")
+            start, end = item
+            if start < 0 or end < 0:
+                raise ValueError("Interval times in remove_seconds must be non-negative")
+            if start >= end:
+                raise ValueError("Interval start must be strictly less than end in remove_seconds")
+        return v
+
 
 
 def load_rules_from_yaml(file_path: Path) -> RulesConfig:
