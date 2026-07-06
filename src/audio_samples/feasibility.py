@@ -1,0 +1,80 @@
+from typing import List, Tuple, Optional
+from audio_samples.rules import ChunksRule
+
+def normalize_intervals(intervals: List[Tuple[int, int]], duration: float) -> List[Tuple[int, int]]:
+    """Caps, sorts, and merges overlapping or adjacent time intervals."""
+    if not intervals:
+        return []
+
+    capped = []
+    for start, end in intervals:
+        # Cap to [0, duration]
+        s = max(0, min(start, int(duration)))
+        e = max(0, min(end, int(duration)))
+        if s < e:
+            capped.append((s, e))
+
+    if not capped:
+        return []
+
+    # Sort by start time
+    capped.sort(key=lambda x: x[0])
+
+    merged = [capped[0]]
+    for current_start, current_end in capped[1:]:
+        last_start, last_end = merged[-1]
+        if current_start <= last_end:
+            # Overlap or adjacent -> merge
+            merged[-1] = (last_start, max(last_end, current_end))
+        else:
+            merged.append((current_start, current_end))
+
+    return merged
+
+
+def calculate_available_duration(duration: float, normalized_intervals: List[Tuple[int, int]]) -> float:
+    """Calculates available duration after subtracting normalized excluded intervals."""
+    total_removed = sum(end - start for start, end in normalized_intervals)
+    return max(0.0, float(duration) - float(total_removed))
+
+
+def check_feasibility(
+    duration: float,
+    rules: List[ChunksRule],
+    sampling_rule: str,
+    remove_seconds: Optional[List[Tuple[int, int]]] = None
+) -> None:
+    """Verifies that all chunking rules can be satisfied given the audio duration.
+    
+    Raises ValueError with a descriptive message if feasibility cannot be satisfied.
+    """
+    for rule in rules:
+        # Combine global remove_seconds and rule-specific remove_seconds
+        combined_remove = []
+        if remove_seconds:
+            combined_remove.extend(remove_seconds)
+        if rule.remove_seconds:
+            combined_remove.extend(rule.remove_seconds)
+
+        normalized = normalize_intervals(combined_remove, duration)
+        available_dur = calculate_available_duration(duration, normalized)
+
+        # 1. Mutually exclusive Random + amount = -1
+        if sampling_rule.lower() == "random" and rule.amount == -1:
+            raise ValueError("amount=-1 and Random are mutually exclusive")
+
+        # 2. Check chunk size vs available duration
+        if rule.chunk_size_seconds > available_dur:
+            raise ValueError(
+                f"Chunk size {rule.chunk_size_seconds}s is larger than total available duration "
+                f"{available_dur}s for this rule."
+            )
+
+        # 3. Check requested total duration vs available duration
+        if rule.amount > 0:
+            requested_dur = rule.amount * rule.chunk_size_seconds
+            if requested_dur > available_dur:
+                raise ValueError(
+                    f"Requested duration {requested_dur}s ({rule.amount} chunks of {rule.chunk_size_seconds}s) "
+                    f"exceeds available duration {available_dur}s."
+                )
