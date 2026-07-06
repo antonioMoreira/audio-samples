@@ -3,11 +3,13 @@ from typing import List, Tuple, Optional
 from audio_samples.rules import ChunksRule
 from audio_samples.feasibility import normalize_intervals
 
+
 def generate_random_layout(
     duration: float,
     rule: ChunksRule,
     global_remove_seconds: Optional[List[Tuple[int, int]]] = None,
-    seed: Optional[int] = None
+    seed: Optional[int] = None,
+    existing_chunks: Optional[List[Tuple[int, int]]] = None,
 ) -> List[Tuple[int, int]]:
     """Generates disjoint random chunk boundaries respecting exclusions.
 
@@ -16,6 +18,7 @@ def generate_random_layout(
         rule: The rule defining chunk size, amount, and custom exclusions.
         global_remove_seconds: Global exclusion ranges.
         seed: Random seed for reproducibility.
+        existing_chunks: Chunks from other rules to avoid overlaps.
 
     Returns:
         A sorted list of chunk boundaries as (start_second, end_second) tuples.
@@ -72,12 +75,23 @@ def generate_random_layout(
             attempts += 1
             continue
 
-        # Check overlap with already selected chunks
+        # Check overlap with already selected chunks in current rule
         overlaps_chunk = False
         for c_start, c_end in chunks:
             if max(start, c_start) < min(end, c_end):
                 overlaps_chunk = True
                 break
+
+        if overlaps_chunk:
+            attempts += 1
+            continue
+
+        # Check overlap with existing chunks from other rules
+        if existing_chunks:
+            for c_start, c_end in existing_chunks:
+                if max(start, c_start) < min(end, c_end):
+                    overlaps_chunk = True
+                    break
 
         if overlaps_chunk:
             attempts += 1

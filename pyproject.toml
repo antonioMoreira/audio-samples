@@ -26,3 +26,6 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.15.20",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/audio_samples"]

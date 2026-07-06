@@ -3,11 +3,12 @@ import av
 from pathlib import Path
 from typing import Union
 
+
 def slice_audio(
     in_path: Union[str, Path],
     out_path: Union[str, Path],
     start_sec: float,
-    end_sec: float
+    end_sec: float,
 ) -> None:
     """Extracts a precise slice from input WAV and writes it to output WAV.
 
@@ -70,7 +71,7 @@ def slice_audio(
 
     all_bytes = b"".join(accumulated_bytes)
 
-    output_container = av.open(out_path_str, mode='w', format='wav')
+    output_container = av.open(out_path_str, mode="w", format="wav")
     try:
         output_stream = output_container.add_stream(codec_name, rate=sample_rate)
         output_stream.layout = layout
@@ -80,13 +81,19 @@ def slice_audio(
         total_samples_written = 0
 
         while total_samples_written < total_needed_samples:
-            samples_to_write = min(write_frame_size, total_needed_samples - total_samples_written)
+            samples_to_write = min(
+                write_frame_size, total_needed_samples - total_samples_written
+            )
 
-            out_frame = av.AudioFrame(format=sample_format, layout=layout, samples=samples_to_write)
+            out_frame = av.AudioFrame(
+                format=sample_format, layout=layout, samples=samples_to_write
+            )
             out_frame.sample_rate = sample_rate
 
             start_byte = total_samples_written * bytes_per_sample_frame
-            end_byte = (total_samples_written + samples_to_write) * bytes_per_sample_frame
+            end_byte = (
+                total_samples_written + samples_to_write
+            ) * bytes_per_sample_frame
             frame_bytes = all_bytes[start_byte:end_byte]
 
             out_frame.planes[0].update(frame_bytes)

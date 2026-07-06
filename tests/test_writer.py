@@ -3,6 +3,7 @@ import av
 from pathlib import Path
 from audio_samples.writer import slice_audio
 
+
 def test_slice_audio_exact_duration(tmp_path):
     in_file = Path("samples/a_ia_ta_ai-1min.wav")
     assert in_file.exists()
@@ -21,9 +22,12 @@ def test_slice_audio_exact_duration(tmp_path):
         assert len(container.streams.audio) == 1
         stream = container.streams.audio[0]
         assert stream.sample_rate == 16000
-        stream_duration = float(stream.duration * stream.time_base) if stream.duration else None
+        stream_duration = (
+            float(stream.duration * stream.time_base) if stream.duration else None
+        )
         assert stream_duration is not None
         assert pytest.approx(stream_duration, 0.001) == 10.0
+
 
 def test_slice_audio_another_range(tmp_path):
     in_file = Path("samples/a_ia_ta_ai-1min.wav")

@@ -14,35 +14,35 @@ from audio_samples.writer import slice_audio
 
 app = typer.Typer(help="Audio Chunks Slicer CLI tool")
 
+
 @app.command()
 def slice_cli(
     audio_name: str = typer.Argument(
-        ...,
-        help="The audio filename, must be inside the samples/ directory."
+        ..., help="The audio filename, must be inside the samples/ directory."
     ),
     chunks_dirname: Optional[str] = typer.Option(
         None,
-        "--chunks-dirname", "-d",
-        help="Chunks directory name inside samples/ (defaults to audio_name stem)."
+        "--chunks-dirname",
+        "-d",
+        help="Chunks directory name inside samples/ (defaults to audio_name stem).",
     ),
     chunks_rules_yaml: str = typer.Option(
         "default_rule.yaml",
-        "--chunks-rules-yaml", "-r",
-        help="Path to the rules YAML file."
+        "--chunks-rules-yaml",
+        "-r",
+        help="Path to the rules YAML file.",
     ),
     sampling_rule: str = typer.Option(
-        "Random",
-        "--sampling-rule", "-s",
-        help="Sampling rule: Random or Continuous."
+        "Random", "--sampling-rule", "-s", help="Sampling rule: Random or Continuous."
     ),
     seed: Optional[int] = typer.Option(
-        None,
-        "--seed",
-        help="Random seed for reproducibility in Random sampling."
-    )
+        None, "--seed", help="Random seed for reproducibility in Random sampling."
+    ),
 ):
     audio_path = Path(audio_name)
-    if not audio_path.is_absolute() and not audio_path.as_posix().startswith("samples/"):
+    if not audio_path.is_absolute() and not audio_path.as_posix().startswith(
+        "samples/"
+    ):
         audio_path = Path("samples") / audio_path
 
     if not audio_path.exists():
@@ -75,13 +75,16 @@ def slice_cli(
         raise typer.Exit(code=1)
 
     try:
-        check_feasibility(duration, config.chunks, sampling_rule, remove_seconds=config.remove_seconds)
+        check_feasibility(
+            duration, config.chunks, sampling_rule, remove_seconds=config.remove_seconds
+        )
     except ValueError as ve:
         typer.echo(f"Feasibility Error: {ve}", err=True)
         raise typer.Exit(code=1)
 
     layouts = []
     generated_counts = {}
+    all_existing_chunks = []
 
     for rule in config.chunks:
         rule_sampling_rule = sampling_rule
@@ -91,8 +94,13 @@ def slice_cli(
             )
         elif rule_sampling_rule.lower() == "random":
             layout = generate_random_layout(
-                duration, rule, global_remove_seconds=config.remove_seconds, seed=seed
+                duration,
+                rule,
+                global_remove_seconds=config.remove_seconds,
+                seed=seed,
+                existing_chunks=all_existing_chunks,
             )
+            all_existing_chunks.extend(layout)
         else:
             typer.echo(f"Error: Unknown sampling rule '{sampling_rule}'", err=True)
             raise typer.Exit(code=1)
@@ -129,12 +137,9 @@ def slice_cli(
     output_config = {
         "version": 1,
         "chunks": [
-            {
-                "chunk_size_seconds": size,
-                "amount": count
-            }
+            {"chunk_size_seconds": size, "amount": count}
             for size, count in generated_counts.items()
-        ]
+        ],
     }
 
     try:
@@ -145,6 +150,7 @@ def slice_cli(
         raise typer.Exit(code=1)
 
     typer.echo("Slicing operation completed successfully!")
+
 
 if __name__ == "__main__":
     app()

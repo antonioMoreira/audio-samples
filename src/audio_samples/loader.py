@@ -3,6 +3,7 @@ import av
 from pathlib import Path
 from typing import Tuple, Union
 
+
 def load_audio_properties(path: Union[str, Path]) -> Tuple[float, int]:
     """Loads the total duration (in seconds) and sample rate of a WAV audio file.
 
