@@ -216,9 +216,9 @@ T5, T6, T4 ──→ T7 ──→ T8
 - Skill: none
 
 **Done when**:
-- [ ] Slice function extracts precise audio from `start` to `end` second using PyAV.
-- [ ] Writes correct formatted WAV file to target directory.
-- [ ] Unit tests verify slice accuracy with a small generated audio file.
+- [x] Slice function extracts precise audio from `start` to `end` second using PyAV.
+- [x] Writes correct formatted WAV file to target directory.
+- [x] Unit tests verify slice accuracy with a small generated audio file.
 
 **Tests**: unit
 **Gate**: quick
