@@ -130,10 +130,10 @@ T5, T6, T4 ──→ T7 ──→ T8
 - Skill: none
 
 **Done when**:
-- [ ] Function implemented to calculate the total available duration after removing `remove_seconds` intervals.
-- [ ] Function verifies that `amount` is specified (> 0) if `sampling_rule` is `Random`.
-- [ ] Checks that total requested duration (sum of chunk size * amount) does not exceed total available duration.
-- [ ] Unit tests cover various feasibility scenarios, both passing and failing with descriptive errors.
+- [x] Function implemented to calculate the total available duration after removing `remove_seconds` intervals.
+- [x] Function verifies that `amount` is specified (> 0) if `sampling_rule` is `Random`.
+- [x] Checks that total requested duration (sum of chunk size * amount) does not exceed total available duration.
+- [x] Unit tests cover various feasibility scenarios, both passing and failing with descriptive errors.
 
 **Tests**: unit
 **Gate**: quick
