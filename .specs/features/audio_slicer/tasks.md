@@ -109,9 +109,9 @@ T5, T6, T4 ──→ T7 ──→ T8
 - Skill: none
 
 **Done when**:
-- [ ] `ChunksRule` Pydantic model defined with fields `chunk_size_seconds`, `amount`, and `remove_seconds`.
-- [ ] YAML parser function loads yaml config into a list of validated `ChunksRule`.
-- [ ] Unit tests verify loading valid rules, invalid rules (e.g. negative chunk sizes), and default yaml.
+- [x] `ChunksRule` Pydantic model defined with fields `chunk_size_seconds`, `amount`, and `remove_seconds`.
+- [x] YAML parser function loads yaml config into a list of validated `ChunksRule`.
+- [x] Unit tests verify loading valid rules, invalid rules (e.g. negative chunk sizes), and default yaml.
 
 **Tests**: unit
 **Gate**: quick
