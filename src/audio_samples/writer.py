@@ -1,12 +1,12 @@
 import os
-import av
 from pathlib import Path
-from typing import Union
+
+import av
 
 
 def slice_audio(
-    in_path: Union[str, Path],
-    out_path: Union[str, Path],
+    in_path: str | Path,
+    out_path: str | Path,
     start_sec: float,
     end_sec: float,
 ) -> None:

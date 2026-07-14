@@ -1,10 +1,10 @@
 import os
-import av
 from pathlib import Path
-from typing import Tuple, Union
+
+import av
 
 
-def load_audio_properties(path: Union[str, Path]) -> Tuple[float, int]:
+def load_audio_properties(path: str | Path) -> tuple[float, int]:
     """Loads the total duration (in seconds) and sample rate of a WAV audio file.
 
     Args:
@@ -24,7 +24,7 @@ def load_audio_properties(path: Union[str, Path]) -> Tuple[float, int]:
     try:
         container = av.open(path_str)
     except Exception as e:
-        raise ValueError(f"Could not open audio file: {e}")
+        raise ValueError(f"Could not open audio file: {e}") from e
 
     with container:
         if not container.streams.audio:

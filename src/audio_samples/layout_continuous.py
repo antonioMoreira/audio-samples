@@ -1,13 +1,12 @@
-from typing import List, Tuple, Optional
-from audio_samples.rules import ChunksRule
 from audio_samples.feasibility import normalize_intervals
+from audio_samples.rules import ChunksRule
 
 
 def generate_continuous_layout(
     duration: float,
     rule: ChunksRule,
-    global_remove_seconds: Optional[List[Tuple[int, int]]] = None,
-) -> List[Tuple[int, int]]:
+    global_remove_seconds: list[tuple[int, int]] | None = None,
+) -> list[tuple[int, int]]:
     """Generates continuous (sequential) chunk boundaries respecting exclusions.
 
     Args:

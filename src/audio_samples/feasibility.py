@@ -1,10 +1,9 @@
-from typing import List, Tuple, Optional
 from audio_samples.rules import ChunksRule
 
 
 def normalize_intervals(
-    intervals: List[Tuple[int, int]], duration: float
-) -> List[Tuple[int, int]]:
+    intervals: list[tuple[int, int]], duration: float
+) -> list[tuple[int, int]]:
     """Caps, sorts, and merges overlapping or adjacent time intervals."""
     if not intervals:
         return []
@@ -36,7 +35,7 @@ def normalize_intervals(
 
 
 def calculate_available_duration(
-    duration: float, normalized_intervals: List[Tuple[int, int]]
+    duration: float, normalized_intervals: list[tuple[int, int]]
 ) -> float:
     """Calculates available duration after subtracting normalized excluded intervals."""
     total_removed = sum(end - start for start, end in normalized_intervals)
@@ -45,9 +44,9 @@ def calculate_available_duration(
 
 def check_feasibility(
     duration: float,
-    rules: List[ChunksRule],
+    rules: list[ChunksRule],
     sampling_rule: str,
-    remove_seconds: Optional[List[Tuple[int, int]]] = None,
+    remove_seconds: list[tuple[int, int]] | None = None,
 ) -> None:
     """Verifies that all chunking rules can be satisfied given the audio duration.
 
@@ -71,8 +70,8 @@ def check_feasibility(
         # 2. Check chunk size vs available duration
         if rule.chunk_size_seconds > available_dur:
             raise ValueError(
-                f"Chunk size {rule.chunk_size_seconds}s is larger than total available duration "
-                f"{available_dur}s for this rule."
+                f"Chunk size {rule.chunk_size_seconds}s is larger than "
+                f"total available duration {available_dur}s for this rule."
             )
 
         # 3. Check requested total duration vs available duration for individual rule
@@ -80,7 +79,8 @@ def check_feasibility(
             requested_dur = rule.amount * rule.chunk_size_seconds
             if requested_dur > available_dur:
                 raise ValueError(
-                    f"Requested duration {requested_dur}s ({rule.amount} chunks of {rule.chunk_size_seconds}s) "
+                    f"Requested duration {requested_dur}s "
+                    f"({rule.amount} chunks of {rule.chunk_size_seconds}s) "
                     f"exceeds available duration {available_dur}s."
                 )
 
@@ -108,8 +108,9 @@ def check_feasibility(
 
             if chunks_count < rule.amount:
                 raise ValueError(
-                    f"Continuous layout cannot fit the requested amount of {rule.amount} chunks "
-                    f"of size {rule.chunk_size_seconds}s (only {chunks_count} can fit)."
+                    "Continuous layout cannot fit the requested amount of "
+                    f"{rule.amount} chunks of size {rule.chunk_size_seconds}s "
+                    f"(only {chunks_count} can fit)."
                 )
 
     # 5. Check cumulative requested duration vs global available duration

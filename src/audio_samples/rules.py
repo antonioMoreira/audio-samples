@@ -1,5 +1,5 @@
-from typing import Optional, List, Tuple
 from pathlib import Path
+
 import yaml
 from pydantic import BaseModel, Field, field_validator
 
@@ -9,7 +9,7 @@ class ChunksRule(BaseModel):
     amount: int = Field(
         -1, description="Amount of chunks to sample. -1 means slice all audio."
     )
-    remove_seconds: Optional[List[Tuple[int, int]]] = Field(
+    remove_seconds: list[tuple[int, int]] | None = Field(
         None, description="Time ranges to remove from sampling."
     )
 
@@ -32,14 +32,15 @@ class ChunksRule(BaseModel):
     @field_validator("remove_seconds")
     @classmethod
     def validate_remove_seconds(
-        cls, v: Optional[List[Tuple[int, int]]]
-    ) -> Optional[List[Tuple[int, int]]]:
+        cls, v: list[tuple[int, int]] | None
+    ) -> list[tuple[int, int]] | None:
         if v is None:
             return v
         for item in v:
             if len(item) != 2:
                 raise ValueError(
-                    "Each interval in remove_seconds must have exactly 2 elements (start, end)"
+                    "Each interval in remove_seconds must have exactly "
+                    "2 elements (start, end)"
                 )
             start, end = item
             if start < 0 or end < 0:
@@ -55,22 +56,23 @@ class ChunksRule(BaseModel):
 
 class RulesConfig(BaseModel):
     version: int = Field(..., description="Configuration file version")
-    chunks: List[ChunksRule] = Field(..., description="List of slicing rules")
-    remove_seconds: Optional[List[Tuple[int, int]]] = Field(
+    chunks: list[ChunksRule] = Field(..., description="List of slicing rules")
+    remove_seconds: list[tuple[int, int]] | None = Field(
         None, description="Global time ranges to remove from sampling."
     )
 
     @field_validator("remove_seconds")
     @classmethod
     def validate_remove_seconds(
-        cls, v: Optional[List[Tuple[int, int]]]
-    ) -> Optional[List[Tuple[int, int]]]:
+        cls, v: list[tuple[int, int]] | None
+    ) -> list[tuple[int, int]] | None:
         if v is None:
             return v
         for item in v:
             if len(item) != 2:
                 raise ValueError(
-                    "Each interval in remove_seconds must have exactly 2 elements (start, end)"
+                    "Each interval in remove_seconds must have exactly "
+                    "2 elements (start, end)"
                 )
             start, end = item
             if start < 0 or end < 0:
@@ -86,6 +88,6 @@ class RulesConfig(BaseModel):
 
 def load_rules_from_yaml(file_path: Path) -> RulesConfig:
     """Load and validate rules configuration from a YAML file."""
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         data = yaml.safe_load(f)
     return RulesConfig.model_validate(data)

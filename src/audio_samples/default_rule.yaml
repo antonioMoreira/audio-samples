@@ -1,0 +1,8 @@
+version: 1
+chunks:
+  - chunk_size_seconds: 2
+    amount: -1
+  - chunk_size_seconds: 10
+    amount: -1
+  - chunk_size_seconds: 30
+    amount: -1

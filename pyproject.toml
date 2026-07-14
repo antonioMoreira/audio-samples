@@ -25,7 +25,42 @@ build-backend = "hatchling.build"
 dev = [
     "pytest>=9.1.1",
     "ruff>=0.15.20",
+    "ty>=0.0.59",
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/audio_samples"]
+
+[tool.ruff]
+# Set the maximum line length
+line-length = 88
+
+# Target Python version matching the environment
+target-version = "py312"
+
+[tool.ruff.lint]
+# Enable standard, modern rulesets
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort (import sorting)
+    "B",    # flake8-bugbear (common design flaws/bugs)
+    "C4",   # flake8-comprehensions (better list/dict/set comprehensions)
+    "N",    # pep8-naming (naming conventions)
+    "UP",   # pyupgrade (upgrade syntax to modern standards)
+    "RUF",  # Ruff-specific rules
+]
+ignore = []
+
+# Allow autofix for all enabled rules
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.format]
+# Configure formatter to match modern standards (like Black)
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+

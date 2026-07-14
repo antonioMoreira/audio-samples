@@ -1,16 +1,18 @@
 import shutil
 from pathlib import Path
-from typing import Optional
+
 import typer
 import yaml
 from pydantic import ValidationError
 
-from audio_samples.rules import load_rules_from_yaml
-from audio_samples.loader import load_audio_properties
 from audio_samples.feasibility import check_feasibility
 from audio_samples.layout_continuous import generate_continuous_layout
 from audio_samples.layout_random import generate_random_layout
+from audio_samples.loader import load_audio_properties
+from audio_samples.rules import load_rules_from_yaml
 from audio_samples.writer import slice_audio
+
+DEFAULT_RULES_YAML = Path(__file__).resolve().parent / "default_rule.yaml"
 
 app = typer.Typer(help="Audio Chunks Slicer CLI tool")
 
@@ -20,14 +22,14 @@ def slice_cli(
     audio_name: str = typer.Argument(
         ..., help="The audio filename, must be inside the samples/ directory."
     ),
-    chunks_dirname: Optional[str] = typer.Option(
+    chunks_dirname: str | None = typer.Option(
         None,
         "--chunks-dirname",
         "-d",
         help="Chunks directory name inside samples/ (defaults to audio_name stem).",
     ),
     chunks_rules_yaml: str = typer.Option(
-        "default_rule.yaml",
+        DEFAULT_RULES_YAML,
         "--chunks-rules-yaml",
         "-r",
         help="Path to the rules YAML file.",
@@ -35,7 +37,7 @@ def slice_cli(
     sampling_rule: str = typer.Option(
         "Random", "--sampling-rule", "-s", help="Sampling rule: Random or Continuous."
     ),
-    seed: Optional[int] = typer.Option(
+    seed: int | None = typer.Option(
         None, "--seed", help="Random seed for reproducibility in Random sampling."
     ),
 ):
@@ -63,16 +65,16 @@ def slice_cli(
         config = load_rules_from_yaml(rules_path)
     except ValidationError as ve:
         typer.echo(f"Validation Error in rules YAML:\n{ve}", err=True)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from ve
     except Exception as e:
         typer.echo(f"Error loading YAML rules: {e}", err=True)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
     try:
-        duration, sample_rate = load_audio_properties(audio_path)
+        duration, _ = load_audio_properties(audio_path)
     except Exception as e:
         typer.echo(f"Error reading audio metadata: {e}", err=True)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
     try:
         check_feasibility(
@@ -80,7 +82,7 @@ def slice_cli(
         )
     except ValueError as ve:
         typer.echo(f"Feasibility Error: {ve}", err=True)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from ve
 
     layouts = []
     generated_counts = {}
@@ -113,7 +115,7 @@ def slice_cli(
             shutil.rmtree(output_dir)
         except Exception as e:
             typer.echo(f"Error clearing existing chunks directory: {e}", err=True)
-            raise typer.Exit(code=1)
+            raise typer.Exit(code=1) from e
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -132,7 +134,7 @@ def slice_cli(
                 slice_audio(audio_path, out_chunk_path, start, end)
             except Exception as e:
                 typer.echo(f"Error writing slice {start}-{end}.wav: {e}", err=True)
-                raise typer.Exit(code=1)
+                raise typer.Exit(code=1) from e
 
     output_config = {
         "version": 1,
@@ -147,7 +149,7 @@ def slice_cli(
             yaml.safe_dump(output_config, f, sort_keys=False)
     except Exception as e:
         typer.echo(f"Error writing output config.yaml: {e}", err=True)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
 
     typer.echo("Slicing operation completed successfully!")
 

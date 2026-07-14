@@ -1,16 +1,16 @@
 import random
-from typing import List, Tuple, Optional
-from audio_samples.rules import ChunksRule
+
 from audio_samples.feasibility import normalize_intervals
+from audio_samples.rules import ChunksRule
 
 
 def generate_random_layout(
     duration: float,
     rule: ChunksRule,
-    global_remove_seconds: Optional[List[Tuple[int, int]]] = None,
-    seed: Optional[int] = None,
-    existing_chunks: Optional[List[Tuple[int, int]]] = None,
-) -> List[Tuple[int, int]]:
+    global_remove_seconds: list[tuple[int, int]] | None = None,
+    seed: int | None = None,
+    existing_chunks: list[tuple[int, int]] | None = None,
+) -> list[tuple[int, int]]:
     """Generates disjoint random chunk boundaries respecting exclusions.
 
     Args:
@@ -41,7 +41,7 @@ def generate_random_layout(
     normalized = normalize_intervals(combined_remove, duration)
 
     rng = random.Random(seed)
-    chunks: List[Tuple[int, int]] = []
+    chunks: list[tuple[int, int]] = []
     chunk_size = rule.chunk_size_seconds
     amount = rule.amount
 
