@@ -1,5 +1,5 @@
-from audio_samples.rules import ChunksRule
 from audio_samples.layout_continuous import generate_continuous_layout
+from audio_samples.rules import ChunksRule
 
 
 def test_generate_continuous_layout_simple():
@@ -18,7 +18,8 @@ def test_generate_continuous_layout_unlimited():
 
 def test_generate_continuous_layout_with_exclusions():
     rule = ChunksRule(chunk_size_seconds=15, amount=-1, remove_seconds=[(10, 20)])
-    # duration 60, should skip [0, 10] (too small), skip [10, 20], place [20, 35], [35, 50]
+    # duration 60, should skip [0, 10] (too small), skip [10, 20],
+    # place [20, 35], [35, 50]
     chunks = generate_continuous_layout(60.0, rule)
     assert chunks == [(20, 35), (35, 50)]
 
@@ -33,7 +34,9 @@ def test_generate_continuous_layout_with_global_and_rule_exclusions():
     # 25-35: fits -> [(0, 10), (25, 35)]
     # 35-45: overlaps with (40, 50) -> current_time set to 50
     # 50-60: fits -> [(0, 10), (25, 35), (50, 60)]
-    chunks = generate_continuous_layout(60.0, rule, global_remove_seconds=global_remove)
+    chunks = generate_continuous_layout(
+        60.0, rule, global_remove_seconds=global_remove
+    )
     assert chunks == [(0, 10), (25, 35), (50, 60)]
 
 

@@ -1,5 +1,7 @@
-import pytest
 from pathlib import Path
+
+import pytest
+
 from audio_samples.loader import load_audio_properties
 
 

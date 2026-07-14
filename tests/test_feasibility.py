@@ -1,10 +1,11 @@
 import pytest
-from audio_samples.rules import ChunksRule
+
 from audio_samples.feasibility import (
-    normalize_intervals,
     calculate_available_duration,
     check_feasibility,
+    normalize_intervals,
 )
+from audio_samples.rules import ChunksRule
 
 
 def test_normalize_intervals():
@@ -58,7 +59,7 @@ def test_check_feasibility_random_infinite_amount_error():
 def test_check_feasibility_insufficient_duration():
     rules = [ChunksRule(chunk_size_seconds=10, amount=11)]
     with pytest.raises(
-        ValueError, match="Requested duration .* exceeds available duration"
+        ValueError, match=r"Requested duration .* exceeds available duration"
     ):
         check_feasibility(100, rules, "Continuous")
 
@@ -66,7 +67,7 @@ def test_check_feasibility_insufficient_duration():
 def test_check_feasibility_single_chunk_larger_than_duration():
     rules = [ChunksRule(chunk_size_seconds=110, amount=1)]
     with pytest.raises(
-        ValueError, match="Chunk size .* is larger than total available duration"
+        ValueError, match=r"Chunk size .* is larger than total available duration"
     ):
         check_feasibility(100, rules, "Continuous")
 
@@ -79,15 +80,16 @@ def test_check_feasibility_cumulative_insufficient_duration():
     # Total requested = (10 * 6) + (20 * 3) = 120s, but only 100s available.
     with pytest.raises(
         ValueError,
-        match="Cumulative requested duration 120s exceeds available duration 100.0s",
+        match=r"Cumulative requested duration 120s exceeds available duration 100\.0s",
     ):
         check_feasibility(100, rules, "Random")
 
 
 def test_check_feasibility_continuous_cannot_fit_due_to_exclusions():
     rules = [ChunksRule(chunk_size_seconds=10, amount=1)]
-    # Duration is 30. But with remove_seconds=[(8, 22)], segments are [0, 8] and [22, 30].
-    # Neither segment is large enough to fit a 10s chunk, even though available duration is 16s.
+    # Duration is 30. But with remove_seconds=[(8, 22)], segments are
+    # [0, 8] and [22, 30]. Neither segment is large enough to fit a
+    # 10s chunk, even though available duration is 16s.
     # Total fit = 0. Requested amount = 1.
     with pytest.raises(
         ValueError,

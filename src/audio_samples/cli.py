@@ -19,47 +19,15 @@ app = typer.Typer(help="Audio Chunks Slicer CLI tool")
 
 @app.command()
 def slice_cli(
-    audio_name: str = typer.Argument(
-        ..., help="The audio filename, must be inside the samples/ directory."
-    ),
-    chunks_dirname: str | None = typer.Option(
-        None,
-        "--chunks-dirname",
-        "-d",
-        help="Chunks directory name inside samples/ (defaults to audio_name stem).",
-    ),
-    chunks_rules_yaml: str = typer.Option(
-        DEFAULT_RULES_YAML,
-        "--chunks-rules-yaml",
-        "-r",
-        help="Path to the rules YAML file.",
-    ),
-    sampling_rule: str = typer.Option(
-        "Random", "--sampling-rule", "-s", help="Sampling rule: Random or Continuous."
-    ),
-    seed: int | None = typer.Option(
-        None, "--seed", help="Random seed for reproducibility in Random sampling."
+    config_path: str = typer.Argument(
+        str(DEFAULT_RULES_YAML),
+        help="Path to the configuration YAML file containing all parameters.",
     ),
 ):
-    audio_path = Path(audio_name)
-    if not audio_path.is_absolute() and not audio_path.as_posix().startswith(
-        "samples/"
-    ):
-        audio_path = Path("samples") / audio_path
-
-    if not audio_path.exists():
-        typer.echo(f"Error: Audio file not found at {audio_path}", err=True)
-        raise typer.Exit(code=1)
-
-    if chunks_dirname is None:
-        chunks_dirname = audio_path.stem
-
-    output_dir = Path("samples") / chunks_dirname
-
-    rules_path = Path(chunks_rules_yaml)
+    rules_path = Path(config_path)
     if not rules_path.exists():
         typer.echo(f"Error: YAML rules file not found at {rules_path}", err=True)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from None
 
     try:
         config = load_rules_from_yaml(rules_path)
@@ -69,6 +37,26 @@ def slice_cli(
     except Exception as e:
         typer.echo(f"Error loading YAML rules: {e}", err=True)
         raise typer.Exit(code=1) from e
+
+    audio_name = config.audio_name
+    chunks_dirname = config.chunks_dirname
+    sampling_rule = config.sampling_rule
+    seed = config.seed
+
+    audio_path = Path(audio_name)
+    if not audio_path.is_absolute() and not audio_path.as_posix().startswith(
+        "samples/"
+    ):
+        audio_path = Path("samples") / audio_path
+
+    if not audio_path.exists():
+        typer.echo(f"Error: Audio file not found at {audio_path}", err=True)
+        raise typer.Exit(code=1) from None
+
+    if chunks_dirname is None:
+        chunks_dirname = audio_path.stem
+
+    output_dir = Path("samples") / chunks_dirname
 
     try:
         duration, _ = load_audio_properties(audio_path)

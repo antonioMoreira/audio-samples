@@ -1,4 +1,8 @@
-version: 1
+version: 2
+audio_name: "a_ia_ta_ai-1min"
+chunks_dirname: "a_ia_ta_ai-1min"
+sampling_rule: "Random"
+seed: 42
 chunks:
   - chunk_size_seconds: 2
     amount: -1

@@ -56,10 +56,23 @@ class ChunksRule(BaseModel):
 
 class RulesConfig(BaseModel):
     version: int = Field(..., description="Configuration file version")
+    audio_name: str = Field("a_ia_ta_ai-1min", description="Audio filename")
+    chunks_dirname: str | None = Field(None, description="Chunks directory name")
+    sampling_rule: str = Field(
+        "Random", description="Sampling rule (Random or Continuous)"
+    )
+    seed: int | None = Field(None, description="Random seed")
     chunks: list[ChunksRule] = Field(..., description="List of slicing rules")
     remove_seconds: list[tuple[int, int]] | None = Field(
         None, description="Global time ranges to remove from sampling."
     )
+
+    @field_validator("sampling_rule")
+    @classmethod
+    def validate_sampling_rule(cls, v: str) -> str:
+        if v.lower() not in ("random", "continuous"):
+            raise ValueError("sampling_rule must be 'Random' or 'Continuous'")
+        return v
 
     @field_validator("remove_seconds")
     @classmethod

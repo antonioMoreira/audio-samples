@@ -1,14 +1,24 @@
 import shutil
 from pathlib import Path
+
 import yaml
 from typer.testing import CliRunner
+
 from audio_samples.cli import app
 
 runner = CliRunner()
 
 
-def test_cli_audio_not_found():
-    result = runner.invoke(app, ["nonexistent_audio.wav"])
+def test_cli_audio_not_found(tmp_path):
+    config_yaml = tmp_path / "config.yaml"
+    config_yaml.write_text("""
+version: 2
+audio_name: "nonexistent_audio.wav"
+chunks:
+  - chunk_size_seconds: 2
+    amount: 1
+""")
+    result = runner.invoke(app, [str(config_yaml)])
     assert result.exit_code == 1
     assert (
         "Error: Audio file not found" in result.stdout
@@ -17,9 +27,7 @@ def test_cli_audio_not_found():
 
 
 def test_cli_yaml_not_found():
-    result = runner.invoke(
-        app, ["a_ia_ta_ai-1min.wav", "--chunks-rules-yaml", "nonexistent_rules.yaml"]
-    )
+    result = runner.invoke(app, ["nonexistent_rules.yaml"])
     assert result.exit_code == 1
     assert (
         "Error: YAML rules file not found" in result.stdout
@@ -30,47 +38,37 @@ def test_cli_yaml_not_found():
 def test_cli_malformed_yaml(tmp_path):
     bad_yaml = tmp_path / "bad.yaml"
     bad_yaml.write_text("chunks:\n  - chunk_size_seconds: -10")
-    result = runner.invoke(
-        app, ["a_ia_ta_ai-1min.wav", "--chunks-rules-yaml", str(bad_yaml)]
-    )
+    result = runner.invoke(app, [str(bad_yaml)])
     assert result.exit_code == 1
     assert "Validation Error" in result.stdout or "Validation Error" in result.stderr
 
 
 def test_cli_random_all_exclusive(tmp_path):
     bad_yaml = tmp_path / "bad.yaml"
-    bad_yaml.write_text(
-        "version: 1\nchunks:\n  - chunk_size_seconds: 5\n    amount: -1"
-    )
-    result = runner.invoke(
-        app,
-        [
-            "a_ia_ta_ai-1min.wav",
-            "--chunks-rules-yaml",
-            str(bad_yaml),
-            "--sampling-rule",
-            "Random",
-        ],
-    )
+    bad_yaml.write_text("""
+version: 2
+audio_name: "a_ia_ta_ai-1min.wav"
+sampling_rule: "Random"
+chunks:
+  - chunk_size_seconds: 5
+    amount: -1
+""")
+    result = runner.invoke(app, [str(bad_yaml)])
     assert result.exit_code == 1
     assert "Feasibility Error" in result.stdout or "Feasibility Error" in result.stderr
 
 
 def test_cli_insufficient_duration(tmp_path):
     bad_yaml = tmp_path / "bad.yaml"
-    bad_yaml.write_text(
-        "version: 1\nchunks:\n  - chunk_size_seconds: 10\n    amount: 10"
-    )
-    result = runner.invoke(
-        app,
-        [
-            "a_ia_ta_ai-1min.wav",
-            "--chunks-rules-yaml",
-            str(bad_yaml),
-            "--sampling-rule",
-            "Continuous",
-        ],
-    )
+    bad_yaml.write_text("""
+version: 2
+audio_name: "a_ia_ta_ai-1min.wav"
+sampling_rule: "Continuous"
+chunks:
+  - chunk_size_seconds: 10
+    amount: 10
+""")
+    result = runner.invoke(app, [str(bad_yaml)])
     assert result.exit_code == 1
     assert "Feasibility Error" in result.stdout or "Feasibility Error" in result.stderr
 
@@ -78,7 +76,10 @@ def test_cli_insufficient_duration(tmp_path):
 def test_cli_happy_continuous(tmp_path):
     rules_yaml = tmp_path / "rules.yaml"
     rules_yaml.write_text("""
-version: 1
+version: 2
+audio_name: "a_ia_ta_ai-1min.wav"
+chunks_dirname: "test_continuous_run"
+sampling_rule: "Continuous"
 remove_seconds:
   - [10, 20]
 chunks:
@@ -90,18 +91,7 @@ chunks:
     if target_dir.exists():
         shutil.rmtree(target_dir)
 
-    result = runner.invoke(
-        app,
-        [
-            "a_ia_ta_ai-1min.wav",
-            "--chunks-dirname",
-            "test_continuous_run",
-            "--chunks-rules-yaml",
-            str(rules_yaml),
-            "--sampling-rule",
-            "Continuous",
-        ],
-    )
+    result = runner.invoke(app, [str(rules_yaml)])
 
     assert result.exit_code == 0
     assert "Slicing operation completed successfully" in result.stdout
@@ -125,7 +115,11 @@ chunks:
 def test_cli_happy_random(tmp_path):
     rules_yaml = tmp_path / "rules.yaml"
     rules_yaml.write_text("""
-version: 1
+version: 2
+audio_name: "a_ia_ta_ai-1min.wav"
+chunks_dirname: "test_random_run"
+sampling_rule: "Random"
+seed: 42
 chunks:
   - chunk_size_seconds: 5
     amount: 2
@@ -135,20 +129,7 @@ chunks:
     if target_dir.exists():
         shutil.rmtree(target_dir)
 
-    result = runner.invoke(
-        app,
-        [
-            "a_ia_ta_ai-1min.wav",
-            "--chunks-dirname",
-            "test_random_run",
-            "--chunks-rules-yaml",
-            str(rules_yaml),
-            "--sampling-rule",
-            "Random",
-            "--seed",
-            "42",
-        ],
-    )
+    result = runner.invoke(app, [str(rules_yaml)])
 
     assert result.exit_code == 0
     assert "Slicing operation completed successfully" in result.stdout

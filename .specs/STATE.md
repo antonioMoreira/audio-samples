@@ -42,13 +42,22 @@
 - **Date**: 2026-07-06
 - **Status**: active
 
+### AD-006
+- **Decision**: Transition to YAML v2 configurations where all execution parameters (`audio_name`, `chunks_dirname`, `sampling_rule`, `seed`) are declared in the YAML config instead of CLI options.
+- **Reason**: Simplifies invocation, improves reproducibility, and unifies configuration.
+- **Trade-off**: Requires changing CLI signature and updating tests.
+- **Scope**: CLI invocation and configuration schema.
+- **Date**: 2026-07-14
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: audio_slicer
-- **Phase / Task**: Specify / Create initial specification from docs/first_spec.md
-- **Completed**: none
-- **In-progress**: .specs/features/audio_slicer/spec.md
-- **Next step**: Propose the initial specification to the user and request feedback / discussion of gray areas.
+- **Feature**: yaml_v2
+- **Phase / Task**: Execute / Completed and verified
+- **Completed**: Specification, Design, Implementation, and Verification (.specs/features/yaml_v2/spec.md)
+- **In-progress**: none
+- **Next step**: Propose features, close tickets
 - **Blockers**: none
-- **Uncommitted files**: .specs/STATE.md
+- **Uncommitted files**: none (all changes committed or verified)
 - **Branch**: main
+

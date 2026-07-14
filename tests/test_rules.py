@@ -1,5 +1,6 @@
 import pytest
 from pydantic import ValidationError
+
 from audio_samples.rules import ChunksRule, load_rules_from_yaml
 
 
@@ -45,7 +46,7 @@ def test_invalid_remove_seconds():
         ChunksRule(chunk_size_seconds=10, remove_seconds=[(-1, 10)])  # start < 0
     with pytest.raises(ValidationError):
         # Tuple must have length 2
-        ChunksRule(chunk_size_seconds=10, remove_seconds=[(0, 10, 20)])  # type: ignore
+        ChunksRule(chunk_size_seconds=10, remove_seconds=[(0, 10, 20)])
 
 
 def test_rules_config_yaml_parsing(tmp_path):

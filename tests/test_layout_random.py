@@ -1,6 +1,7 @@
 import pytest
-from audio_samples.rules import ChunksRule
+
 from audio_samples.layout_random import generate_random_layout
+from audio_samples.rules import ChunksRule
 
 
 def test_generate_random_layout_happy():
