@@ -74,12 +74,14 @@ def slice_audio(
     output_container = av.open(out_path_str, mode="w", format="wav")
     try:
         output_stream = output_container.add_stream(codec_name, rate=sample_rate)
+        assert isinstance(output_stream, av.AudioStream)
         output_stream.layout = layout
         output_stream.format = sample_format
 
         write_frame_size = 1024
         total_samples_written = 0
 
+        assert bytes_per_sample_frame is not None
         while total_samples_written < total_needed_samples:
             samples_to_write = min(
                 write_frame_size, total_needed_samples - total_samples_written
