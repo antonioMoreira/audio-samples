@@ -49,6 +49,13 @@ def slice_cli(
     ):
         audio_path = Path("samples") / audio_path
 
+    if (
+        audio_path.is_dir() or not audio_path.exists()
+    ) and not audio_path.suffix == ".wav":
+        wav_path = audio_path.with_suffix(".wav")
+        if wav_path.exists() and wav_path.is_file():
+            audio_path = wav_path
+
     if not audio_path.exists():
         typer.echo(f"Error: Audio file not found at {audio_path}", err=True)
         raise typer.Exit(code=1) from None
