@@ -50,14 +50,24 @@
 - **Date**: 2026-07-14
 - **Status**: active
 
+### AD-007
+- **Decision**: Add wav2base64 utility script and pyperclip dependency to support fast, reliable WAV-to-base64 conversion.
+- **Reason**: Requested by the user to facilitate base64 asset encoding.
+- **Trade-off**: Introduces pyperclip dependency.
+- **Scope**: wav2base64 feature.
+- **Date**: 2026-07-15
+- **Status**: active
+
 ## Handoff
 
-- **Feature**: yaml_v2
+- **Feature**: wav2base64
 - **Phase / Task**: Execute / Completed and verified
-- **Completed**: Specification, Design, Implementation, and Verification (.specs/features/yaml_v2/spec.md)
+- **Completed**: Specification, Design, Implementation, and Verification (.specs/features/wav2base64/spec.md)
 - **In-progress**: none
 - **Next step**: Propose features, close tickets
 - **Blockers**: none
 - **Uncommitted files**: none (all changes committed or verified)
 - **Branch**: main
+
+
 

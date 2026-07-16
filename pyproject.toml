@@ -10,12 +10,14 @@ requires-python = ">=3.14"
 dependencies = [
     "av>=18.0.0",
     "pydantic>=2.13.4",
+    "pyperclip>=1.11.0",
     "pyyaml>=6.0.3",
     "typer>=0.26.8",
 ]
 
 [project.scripts]
 audio-slicer = "audio_samples.cli:app"
+wav2base64 = "scripts.wav2base64:app"
 
 [build-system]
 requires = ["hatchling"]
@@ -29,7 +31,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/audio_samples"]
+packages = ["src/audio_samples", "scripts"]
 
 [tool.ruff]
 # Set the maximum line length
