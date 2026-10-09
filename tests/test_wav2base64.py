@@ -37,9 +37,7 @@ def test_convert_success_with_print(tmp_path):
     expected_base64 = base64.b64encode(data).decode("utf-8")
 
     with patch("pyperclip.copy") as mock_copy:
-        result = runner.invoke(
-            app, ["convert", str(wav_file), "--print"]
-        )
+        result = runner.invoke(app, ["convert", str(wav_file), "--print"])
 
         assert result.exit_code == 0
         mock_copy.assert_called_once_with(expected_base64)

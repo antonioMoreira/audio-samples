@@ -34,9 +34,7 @@ def test_generate_continuous_layout_with_global_and_rule_exclusions():
     # 25-35: fits -> [(0, 10), (25, 35)]
     # 35-45: overlaps with (40, 50) -> current_time set to 50
     # 50-60: fits -> [(0, 10), (25, 35), (50, 60)]
-    chunks = generate_continuous_layout(
-        60.0, rule, global_remove_seconds=global_remove
-    )
+    chunks = generate_continuous_layout(60.0, rule, global_remove_seconds=global_remove)
     assert chunks == [(0, 10), (25, 35), (50, 60)]
 
 

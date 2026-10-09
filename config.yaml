@@ -1,0 +1,7 @@
+version: 2
+audio_name: "traducao_e_legendagem-A_IA_TA_AI"
+chunks_dirname: "traducao_e_legendagem-A_IA_TA_AI"
+sampling_rule: "Continuous"
+chunks:
+  - chunk_size_seconds: 30
+    amount: 10

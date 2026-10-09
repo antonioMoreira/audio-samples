@@ -6,6 +6,8 @@ A robust, type-safe Python Command-Line Interface (CLI) tool designed to slice l
 
 ## Features
 
+- 🎥 **MP4 Video Ingestion & Conversion**: Directly pass `.mp4` video files to `audio-slicer` or in your configuration. Converts audio to 16 kHz mono WAV using `PyAV` (equivalent to `ffmpeg -i [VIDEO].mp4 -ar 16000 -ac 1 [VIDEO].wav`).
+- 🏷️ **Automatic Name Normalization**: Cleans and normalizes filenames containing spaces or special characters on disk (e.g., `"This is a video.mp4"` $\rightarrow$ `"This_is_a_video.mp4"`).
 - 📜 **YAML-Driven Configuration (v2)**: Fully declarative slicing rules. Define inputs, outputs, sampling methods, and segment rules in a single, versionable YAML file.
 - 🔀 **Multiple Sampling Modes**:
   - `Continuous`: Slices the audio sequentially from start to end.
@@ -47,6 +49,9 @@ uv run audio-slicer
 
 # Run specifying a custom configuration file
 uv run audio-slicer path/to/config.yaml
+
+# Directly pass an MP4 video file (automatically normalized, converted to 16kHz mono WAV, and sliced)
+uv run audio-slicer "samples/This is a video.mp4"
 ```
 
 ---
@@ -73,7 +78,7 @@ chunks:
 ### Field Definitions
 
 - `version`: Configuration schema version (`2` is standard).
-- `audio_name`: The filename of the target audio. Must be located inside the `samples/` directory. (If extension `.wav` is omitted, the CLI automatically falls back to `.wav`).
+- `audio_name`: The filename of the target audio. ==Must== be located inside the `samples/` directory. (If extension `.wav` is omitted, the CLI automatically falls back to `.wav`).
 - `chunks_dirname`: Directory name under `samples/` where outputs will be saved. Defaults to `audio_name` stem.
 - `sampling_rule`: Slicing method, either `Continuous` or `Random`.
 - `seed`: Integer seed for the random number generator (reproducible `Random` sampling).
@@ -123,5 +128,5 @@ To verify code quality and complete type safety, run:
 uv run ruff check src/ tests/
 
 # Check static typing diagnostics with ty
-ty check src/ tests/
+uv run ty check src/ tests/
 ```
