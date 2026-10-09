@@ -13,3 +13,6 @@ wheels/
 *.wav
 samples/**/*.wav
 samples/*.wav
+
+# Notebooks
+notebooks/.ipynb_checkpoints
