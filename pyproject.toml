@@ -9,10 +9,15 @@ authors = [
 requires-python = ">=3.14"
 dependencies = [
     "av>=18.0.0",
+    "ffmpeg-normalize>=1.43.0",
+    "matplotlib>=3.11.2",
+    "mcp>=2.3.0",
     "numpy>=2.5.1",
     "pydantic>=2.13.4",
     "pyperclip>=1.11.0",
     "pyyaml>=6.0.3",
+    "torch>=2.14.1",
+    "torchaudio>=2.11.0",
     "typer>=0.26.8",
 ]
 
@@ -31,8 +36,7 @@ dev = [
     "ty>=0.0.59",
 ]
 notebook-analysis = [
-    "jupyter-ai>=3.1.2",
-    "jupyterlab>=4.6.2",
+    "marimo>=0.25.2",
 ]
 
 [tool.hatch.build.targets.wheel]
