@@ -21,6 +21,11 @@ dependencies = [
     "typer>=0.26.8",
 ]
 
+[project.optional-dependencies]
+faster-whisper = [
+    "faster-whisper>=1.2.1",
+]
+
 [project.scripts]
 audio-slicer = "audio_samples.cli:app"
 wav2base64 = "scripts.wav2base64:app"

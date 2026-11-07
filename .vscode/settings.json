@@ -19,6 +19,7 @@
   "ruff.organizeImports": true,
   "ruff.fixAll": true,
   "ruff.exclude": [
-    "**/*.ipynb"
+    "**/*.ipynb",
+    "notebooks/**"
   ]
 }
