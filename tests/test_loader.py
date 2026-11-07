@@ -6,13 +6,13 @@ from audio_samples.loader import load_audio_properties
 
 
 def test_load_audio_properties_real_file():
-    # Use the real 1-minute file available in the samples/ directory
-    path = Path("samples/a_ia_ta_ai-1min.wav")
+    # Use the real sample file available in the samples/ directory
+    path = Path("samples/a_ia_ta_ai_slice_90-255.wav")
     assert path.exists(), f"{path} must exist in the workspace to run tests"
 
     duration, sample_rate = load_audio_properties(path)
-    assert pytest.approx(duration, 0.01) == 60.0
-    assert sample_rate == 16000
+    assert pytest.approx(duration, 0.1) == 165.05
+    assert sample_rate == 22050
 
 
 def test_load_audio_properties_file_not_found():

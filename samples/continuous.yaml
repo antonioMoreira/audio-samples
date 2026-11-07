@@ -1,0 +1,12 @@
+version: 3
+audio_path: "samples/a_ia_ta_ai_slice_90-255.wav"
+output_path: "samples"
+chunks_dirname: "a_ia_ta_ai_slice_90-255-Continuous"
+sampling_rule: "Continuous"
+chunks:
+  - chunk_size_seconds: 10
+    amount: 10
+  - chunk_size_seconds: 20
+    amount: 5
+  - chunk_size_seconds: 30
+    amount: -1

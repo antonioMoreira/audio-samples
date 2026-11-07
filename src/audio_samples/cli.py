@@ -17,7 +17,8 @@ from audio_samples.loader import load_audio_properties
 from audio_samples.rules import load_rules_from_yaml
 from audio_samples.writer import slice_audio
 
-DEFAULT_RULES_YAML = Path(__file__).resolve().parent / "default_rule.yaml"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "output"
 
 app = typer.Typer(help="Audio Chunks Slicer CLI tool")
 
@@ -25,104 +26,70 @@ app = typer.Typer(help="Audio Chunks Slicer CLI tool")
 @app.command()
 def slice_cli(
     config_path: str = typer.Argument(
-        str(DEFAULT_RULES_YAML),
-        help="Path to YAML rules configuration or MP4 video file.",
+        ...,
+        help="Path to YAML rules configuration file.",
     ),
 ):
-    input_path = Path(config_path)
+    rules_path = Path(config_path)
+    if not rules_path.is_absolute() and not rules_path.exists():
+        candidate_rules = PROJECT_ROOT / rules_path
+        if candidate_rules.exists():
+            rules_path = candidate_rules
 
-    # Check if direct MP4 argument was provided
-    if input_path.suffix.lower() == ".mp4":
-        video_path = input_path
-        if not video_path.is_absolute() and not video_path.as_posix().startswith(
-            "samples/"
-        ):
-            if not video_path.exists() and (Path("samples") / video_path).exists():
-                video_path = Path("samples") / video_path
+    if not rules_path.exists():
+        typer.echo(f"Error: YAML rules file not found at {rules_path}", err=True)
+        raise typer.Exit(code=1) from None
 
-        if not video_path.exists():
-            typer.echo(f"Error: Video file not found at {video_path}", err=True)
+    try:
+        config = load_rules_from_yaml(rules_path)
+    except ValidationError as ve:
+        typer.echo(f"Validation Error in rules YAML:\n{ve}", err=True)
+        raise typer.Exit(code=1) from ve
+    except Exception as e:
+        typer.echo(f"Error loading YAML rules: {e}", err=True)
+        raise typer.Exit(code=1) from e
+
+    chunks_dirname = config.chunks_dirname
+    sampling_rule = config.sampling_rule
+    seed = config.seed
+
+    audio_path = Path(config.audio_path)
+    if not audio_path.is_absolute():
+        audio_path = PROJECT_ROOT / audio_path
+
+    if audio_path.suffix.lower() == ".mp4":
+        if not audio_path.exists():
+            norm_name = normalize_video_name(audio_path.name)
+            candidate = audio_path.with_name(norm_name)
+            if candidate.exists():
+                audio_path = candidate
+
+        if not audio_path.exists() or not audio_path.is_file():
+            typer.echo(f"Error: Video file not found at {audio_path}", err=True)
             raise typer.Exit(code=1) from None
 
-        normalized_video = normalize_video_file(video_path)
+        normalized_video = normalize_video_file(audio_path)
         typer.echo(f"Converting video to 16kHz mono WAV: {normalized_video.name}")
         try:
-            wav_path = convert_video_to_wav(normalized_video)
+            audio_path = convert_video_to_wav(normalized_video)
         except Exception as e:
             typer.echo(f"Error converting video to WAV: {e}", err=True)
             raise typer.Exit(code=1) from e
-
-        config = load_rules_from_yaml(DEFAULT_RULES_YAML)
-        config.audio_name = str(wav_path)
-        chunks_dirname = normalized_video.stem
-        audio_path = wav_path
-        sampling_rule = config.sampling_rule
-        seed = config.seed
+        if chunks_dirname is None:
+            chunks_dirname = normalized_video.stem
     else:
-        rules_path = input_path
-        if not rules_path.exists():
-            typer.echo(f"Error: YAML rules file not found at {rules_path}", err=True)
+        if not audio_path.exists() or not audio_path.is_file():
+            typer.echo(f"Error: Audio file not found at {audio_path}", err=True)
             raise typer.Exit(code=1) from None
 
-        try:
-            config = load_rules_from_yaml(rules_path)
-        except ValidationError as ve:
-            typer.echo(f"Validation Error in rules YAML:\n{ve}", err=True)
-            raise typer.Exit(code=1) from ve
-        except Exception as e:
-            typer.echo(f"Error loading YAML rules: {e}", err=True)
-            raise typer.Exit(code=1) from e
+        if chunks_dirname is None:
+            chunks_dirname = audio_path.stem
 
-        audio_name = config.audio_name
-        chunks_dirname = config.chunks_dirname
-        sampling_rule = config.sampling_rule
-        seed = config.seed
+    base_output_dir = Path(config.output_path)
+    if not base_output_dir.is_absolute():
+        base_output_dir = PROJECT_ROOT / base_output_dir
 
-        audio_path = Path(audio_name)
-        if not audio_path.is_absolute() and not audio_path.as_posix().startswith(
-            "samples/"
-        ):
-            audio_path = Path("samples") / audio_path
-
-        mp4_target: Path | None = None
-        if audio_path.suffix.lower() == ".mp4" and audio_path.exists():
-            mp4_target = audio_path
-        elif audio_path.with_suffix(".mp4").exists():
-            mp4_target = audio_path.with_suffix(".mp4")
-        elif not audio_path.exists():
-            norm_name = normalize_video_name(audio_path.name)
-            candidate = audio_path.with_name(norm_name)
-            if candidate.suffix.lower() == ".mp4" and candidate.exists():
-                mp4_target = candidate
-            elif candidate.with_suffix(".mp4").exists():
-                mp4_target = candidate.with_suffix(".mp4")
-
-        if mp4_target is not None:
-            normalized_video = normalize_video_file(mp4_target)
-            typer.echo(f"Converting video to 16kHz mono WAV: {normalized_video.name}")
-            try:
-                audio_path = convert_video_to_wav(normalized_video)
-            except Exception as e:
-                typer.echo(f"Error converting video to WAV: {e}", err=True)
-                raise typer.Exit(code=1) from e
-            if chunks_dirname is None:
-                chunks_dirname = normalized_video.stem
-        else:
-            if (
-                audio_path.is_dir() or not audio_path.exists()
-            ) and not audio_path.suffix == ".wav":
-                wav_path = audio_path.with_suffix(".wav")
-                if wav_path.exists() and wav_path.is_file():
-                    audio_path = wav_path
-
-            if not audio_path.exists():
-                typer.echo(f"Error: Audio file not found at {audio_path}", err=True)
-                raise typer.Exit(code=1) from None
-
-            if chunks_dirname is None:
-                chunks_dirname = audio_path.stem
-
-    output_dir = Path("samples") / chunks_dirname
+    output_dir = base_output_dir / chunks_dirname
 
     try:
         duration, _ = load_audio_properties(audio_path)
@@ -140,7 +107,6 @@ def slice_cli(
 
     layouts = []
     generated_counts = {}
-    all_existing_chunks = []
 
     for rule in config.chunks:
         rule_sampling_rule = sampling_rule
@@ -154,9 +120,7 @@ def slice_cli(
                 rule,
                 global_remove_seconds=config.remove_seconds,
                 seed=seed,
-                existing_chunks=all_existing_chunks,
             )
-            all_existing_chunks.extend(layout)
         else:
             typer.echo(f"Error: Unknown sampling rule '{sampling_rule}'", err=True)
             raise typer.Exit(code=1)

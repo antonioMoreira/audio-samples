@@ -56,7 +56,12 @@ class ChunksRule(BaseModel):
 
 class RulesConfig(BaseModel):
     version: int = Field(..., description="Configuration file version")
-    audio_name: str = Field("a_ia_ta_ai-1min", description="Audio filename")
+    audio_path: str = Field(
+        ..., description="Path to the audio or video file (.wav or .mp4)"
+    )
+    output_path: str = Field(
+        "output", description="Base output directory path (relative to project root)"
+    )
     chunks_dirname: str | None = Field(None, description="Chunks directory name")
     sampling_rule: str = Field(
         "Random", description="Sampling rule (Random or Continuous)"
@@ -66,6 +71,20 @@ class RulesConfig(BaseModel):
     remove_seconds: list[tuple[int, int]] | None = Field(
         None, description="Global time ranges to remove from sampling."
     )
+
+    @field_validator("version")
+    @classmethod
+    def validate_version(cls, v: int) -> int:
+        if v != 3:
+            raise ValueError("version must be 3")
+        return v
+
+    @field_validator("audio_path")
+    @classmethod
+    def validate_audio_path(cls, v: str) -> str:
+        if Path(v).suffix.lower() not in (".wav", ".mp4"):
+            raise ValueError("audio_path must have a '.wav' or '.mp4' suffix")
+        return v
 
     @field_validator("sampling_rule")
     @classmethod

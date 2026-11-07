@@ -113,15 +113,16 @@ def check_feasibility(
                     f"(only {chunks_count} can fit)."
                 )
 
-    # 5. Check cumulative requested duration vs global available duration
-    global_normalized = normalize_intervals(remove_seconds or [], duration)
-    global_available_dur = calculate_available_duration(duration, global_normalized)
+    # 5. Check cumulative requested duration vs global available duration (Random only)
+    if sampling_rule.lower() == "random":
+        global_normalized = normalize_intervals(remove_seconds or [], duration)
+        global_available_dur = calculate_available_duration(duration, global_normalized)
 
-    total_requested_dur = sum(
-        rule.amount * rule.chunk_size_seconds for rule in rules if rule.amount > 0
-    )
-    if total_requested_dur > global_available_dur:
-        raise ValueError(
-            f"Cumulative requested duration {total_requested_dur}s exceeds "
-            f"available duration {global_available_dur}s."
+        total_requested_dur = sum(
+            rule.amount * rule.chunk_size_seconds for rule in rules if rule.amount > 0
         )
+        if total_requested_dur > global_available_dur:
+            raise ValueError(
+                f"Cumulative requested duration {total_requested_dur}s exceeds "
+                f"available duration {global_available_dur}s."
+            )

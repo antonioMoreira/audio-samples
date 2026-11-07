@@ -120,13 +120,13 @@ def test_decode_audio_split_stereo(tmp_path: Path) -> None:
 
 
 def test_decode_audio_real_sample() -> None:
-    sample_path = Path("samples/a_ia_ta_ai-1min.wav")
+    sample_path = Path("samples/a_ia_ta_ai_slice_90-255.wav")
     assert sample_path.exists(), f"{sample_path} must exist in workspace"
 
     audio = decode_audio(sample_path, sampling_rate=16000)
     assert audio.dtype == np.float32
     assert audio.ndim == 1
-    assert abs(audio.shape[0] - 60 * 16000) < 1600
+    assert abs(audio.shape[0] - 165 * 16000) < 1600
 
 
 def test_ignore_invalid_frames() -> None:

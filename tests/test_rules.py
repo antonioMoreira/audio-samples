@@ -50,9 +50,10 @@ def test_invalid_remove_seconds():
 
 
 def test_rules_config_yaml_parsing(tmp_path):
-    # Test parsing valid YAML configuration
+    # Test parsing valid YAML v3 configuration
     yaml_content = """
-    version: 1
+    version: 3
+    audio_path: "samples/a_ia_ta_ai-1min.wav"
     chunks:
       - chunk_size_seconds: 2
         amount: -1
@@ -66,7 +67,9 @@ def test_rules_config_yaml_parsing(tmp_path):
     config_file.write_text(yaml_content)
 
     config = load_rules_from_yaml(config_file)
-    assert config.version == 1
+    assert config.version == 3
+    assert config.audio_path == "samples/a_ia_ta_ai-1min.wav"
+    assert config.output_path == "output"
     assert len(config.chunks) == 2
 
     assert config.chunks[0].chunk_size_seconds == 2
@@ -81,7 +84,8 @@ def test_rules_config_yaml_parsing(tmp_path):
 def test_invalid_yaml_parsing(tmp_path):
     # Test parsing invalid/malformed YAML configuration
     yaml_content = """
-    version: 1
+    version: 3
+    audio_path: "samples/a_ia_ta_ai-1min.wav"
     chunks:
       - chunk_size_seconds: -10
         amount: 2
@@ -90,4 +94,45 @@ def test_invalid_yaml_parsing(tmp_path):
     config_file.write_text(yaml_content)
 
     with pytest.raises(ValidationError):
+        load_rules_from_yaml(config_file)
+
+
+def test_invalid_version_yaml_parsing(tmp_path):
+    yaml_content = """
+    version: 2
+    audio_path: "samples/a_ia_ta_ai-1min.wav"
+    chunks:
+      - chunk_size_seconds: 10
+        amount: 2
+    """
+    config_file = tmp_path / "invalid_version.yaml"
+    config_file.write_text(yaml_content)
+
+    with pytest.raises(ValidationError, match="version must be 3"):
+        load_rules_from_yaml(config_file)
+
+
+@pytest.mark.parametrize(
+    "bad_audio_path",
+    [
+        "samples/audio_without_suffix",
+        "samples/audio.mp3",
+        "samples/audio.flac",
+        ".wav",
+    ],
+)
+def test_invalid_audio_path_suffix(tmp_path, bad_audio_path):
+    yaml_content = f"""
+    version: 3
+    audio_path: "{bad_audio_path}"
+    chunks:
+      - chunk_size_seconds: 10
+        amount: 2
+    """
+    config_file = tmp_path / "invalid_suffix.yaml"
+    config_file.write_text(yaml_content)
+
+    with pytest.raises(
+        ValidationError, match=r"audio_path must have a '\.wav' or '\.mp4' suffix"
+    ):
         load_rules_from_yaml(config_file)

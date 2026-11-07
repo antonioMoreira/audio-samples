@@ -84,6 +84,8 @@ def generate_random_layout(
 
         if overlaps_chunk:
             attempts += 1
+            if attempts % 50 == 0:
+                chunks.clear()
             continue
 
         # Check overlap with existing chunks from other rules
@@ -95,6 +97,8 @@ def generate_random_layout(
 
         if overlaps_chunk:
             attempts += 1
+            if attempts % 50 == 0:
+                chunks.clear()
             continue
 
         chunks.append((start, end))

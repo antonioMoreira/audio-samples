@@ -7,7 +7,7 @@ from audio_samples.writer import slice_audio
 
 
 def test_slice_audio_exact_duration(tmp_path):
-    in_file = Path("samples/a_ia_ta_ai-1min.wav")
+    in_file = Path("samples/a_ia_ta_ai_slice_90-255.wav")
     assert in_file.exists()
 
     out_file = tmp_path / "slice_5_15.wav"
@@ -24,7 +24,7 @@ def test_slice_audio_exact_duration(tmp_path):
 
         assert len(container.streams.audio) == 1
         stream = container.streams.audio[0]
-        assert stream.sample_rate == 16000
+        assert stream.sample_rate == 22050
         str_dur = stream.duration
         time_base = stream.time_base
         assert str_dur is not None
@@ -34,7 +34,7 @@ def test_slice_audio_exact_duration(tmp_path):
 
 
 def test_slice_audio_another_range(tmp_path):
-    in_file = Path("samples/a_ia_ta_ai-1min.wav")
+    in_file = Path("samples/a_ia_ta_ai_slice_90-255.wav")
     out_file = tmp_path / "slice_22_25.wav"
 
     slice_audio(in_file, out_file, 22.0, 25.0)

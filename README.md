@@ -6,9 +6,9 @@ A robust, type-safe Python Command-Line Interface (CLI) tool designed to slice l
 
 ## Features
 
-- 🎥 **MP4 Video Ingestion & Conversion**: Directly pass `.mp4` video files to `audio-slicer` or in your configuration. Converts audio to 16 kHz mono WAV using `PyAV` (equivalent to `ffmpeg -i [VIDEO].mp4 -ar 16000 -ac 1 [VIDEO].wav`).
+- 🎥 **MP4 Video Ingestion & Conversion**: Specify `.mp4` video files or `.wav` audio files via `audio_path` in your configuration. Converts video audio to 16 kHz mono WAV using `PyAV` (equivalent to `ffmpeg -i [VIDEO].mp4 -ar 16000 -ac 1 [VIDEO].wav`).
 - 🏷️ **Automatic Name Normalization**: Cleans and normalizes filenames containing spaces or special characters on disk (e.g., `"This is a video.mp4"` $\rightarrow$ `"This_is_a_video.mp4"`).
-- 📜 **YAML-Driven Configuration (v2)**: Fully declarative slicing rules. Define inputs, outputs, sampling methods, and segment rules in a single, versionable YAML file.
+- 📜 **YAML-Driven Configuration (v3)**: Fully declarative slicing rules. Define inputs, outputs, sampling methods, and segment rules in a single, versionable YAML file.
 - 🔀 **Multiple Sampling Modes**:
   - `Continuous`: Slices the audio sequentially from start to end.
   - `Random`: Samples a specified number of non-overlapping, disjoint chunks randomly.
@@ -41,45 +41,44 @@ uv pip install -e .
 
 ## Usage
 
-You can run the slicer directly via `uv run`:
+You can run the slicer directly via `uv run` by providing a configuration YAML file:
 
 ```bash
-# Run using the default configuration (default_rule.yaml)
-uv run audio-slicer
-
-# Run specifying a custom configuration file
-uv run audio-slicer path/to/config.yaml
-
-# Directly pass an MP4 video file (automatically normalized, converted to 16kHz mono WAV, and sliced)
-uv run audio-slicer "samples/This is a video.mp4"
+# Run specifying a configuration file (required)
+uv run audio-slicer samples/continuous.yaml
+uv run audio-slicer samples/random.yaml
 ```
 
 ---
 
-## Configuration Schema (YAML v2)
+## Configuration Schema (YAML v3)
 
-The tool reads all parameters from a single configuration file. Here is an example of a YAML v2 file:
+The tool reads all parameters from a single configuration file. Here is an example of a YAML v3 file:
 
 ```yaml
-version: 2
-audio_name: "a_ia_ta_ai-1min"
-chunks_dirname: "a_ia_ta_ai-1min"
+version: 3
+audio_path: "samples/a_ia_ta_ai_slice_90-255.wav"
+output_path: "output"  # Optional: defaults to "output"
+chunks_dirname: "a_ia_ta_ai_slice_90-255-Continuous"
 sampling_rule: "Continuous"
 seed: 42  # Optional: Seed for random placement reproducibility
 remove_seconds:
   - [10, 20]  # Global segments to skip/remove
 chunks:
-  - chunk_size_seconds: 2
-    amount: -1  # -1 means slice all available audio sequentially
   - chunk_size_seconds: 10
-    amount: 5   # Extract exactly 5 chunks of 10s
+    amount: 10
+  - chunk_size_seconds: 20
+    amount: 5
+  - chunk_size_seconds: 30
+    amount: -1  # -1 means slice all available audio sequentially
 ```
 
 ### Field Definitions
 
-- `version`: Configuration schema version (`2` is standard).
-- `audio_name`: The filename of the target audio. ==Must== be located inside the `samples/` directory. (If extension `.wav` is omitted, the CLI automatically falls back to `.wav`).
-- `chunks_dirname`: Directory name under `samples/` where outputs will be saved. Defaults to `audio_name` stem.
+- `version`: Configuration schema version (`3` is required).
+- `audio_path`: Path to the target audio (`.wav`) or video (`.mp4`) file, including the file extension. If not absolute, it is resolved relative to the project root.
+- `output_path`: Base output directory path. Defaults to `"output"`. If not absolute, it is resolved relative to the project root.
+- `chunks_dirname`: Directory name under `output_path` where outputs will be saved. Defaults to `audio_path` stem.
 - `sampling_rule`: Slicing method, either `Continuous` or `Random`.
 - `seed`: Integer seed for the random number generator (reproducible `Random` sampling).
 - `remove_seconds`: List of `[start, end]` second pairs to completely exclude from slicing.
@@ -91,11 +90,10 @@ chunks:
 
 ## Directory Structure
 
-Output chunks are saved inside a subfolder under `samples/` corresponding to the slice duration:
+Output chunks are saved inside a subfolder under `output/` corresponding to `chunks_dirname` and the slice duration:
 
 ```
-samples/
-├── a_ia_ta_ai-1min.wav         # Source audio file
+output/
 └── a_ia_ta_ai-1min/            # Output chunks directory
     ├── config.yaml             # Summary run file of executed rules
     ├── 2/                      # 2-second chunks

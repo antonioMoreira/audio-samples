@@ -5,14 +5,14 @@ build/
 dist/
 wheels/
 *.egg-info
+.tmp
 
 # Virtual environments
 .venv
 
-# Audio files
-*.wav
-samples/**/*.wav
-samples/*.wav
-
 # Notebooks
 notebooks/.ipynb_checkpoints
+
+**/*.mp4
+
+output/
